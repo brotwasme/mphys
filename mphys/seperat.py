@@ -10,7 +10,7 @@ print('refnx: %s\nscipy: %s\nnumpy: %s' % (refnx.version.version,
                    scipy.version.version, np.version.version))
 
 
-def seperate(data):
+def seperate(data):#not used
     outs = []
 
 #     np.savetxt("outs.txt", [[0,0]])
@@ -159,7 +159,7 @@ def seperate(data):
 
 
 
-def seperateNLayer(data, nLayers, limits = None, doMCMC=False):
+def seperateNLayer(data, nLayers, limits = None, doMCMC=False): #used
 
     air = SLD(0,name="air layer")
     airSlab = air(10,0)
