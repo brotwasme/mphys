@@ -135,7 +135,7 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
                       logp_extra=logpExtra)
             returns = GlobalObjective([objective1, objective2])
 
-    else if not globalObjective:
+    elif not globalObjective:
         if nLayers==1:
             structure = airSlab|sld1Slab|sio2Slab
         if nLayers==2:
@@ -157,6 +157,6 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
             objective = Objective(model, data, transform=Transform('logY'),logp_extra=logpExtra)
             returns = objective
     else:
-        print("error contrast layer not at sld1Slab ie contrast_layer!=0"
+        print("error contrast layer not at sld1Slab ie contrast_layer!=0")
     return returns
 
