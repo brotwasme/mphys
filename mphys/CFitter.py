@@ -24,20 +24,27 @@ class CFitter:
         self.nDimensions=None
         self.bounds()
         self.nDim()
+#         print(self.nDimensions)
+#         print(self.upperBounds,self.lowerBounds)
+#         print(list(f_unique(p for p
+#                      in flatten(self.objective.parameters) if p.vary )))
+#         print(list(p for p
+#                      in f_unique(flatten(self.objective.parameters)) if p.vary ))
+        
 
     def priorTransform(self,u):
         return u*(self.upperBounds-self.lowerBounds) + self.lowerBounds
 
     def bounds(self):
-        bounds = list(f_unique( (p.bounds.lb, p.bounds.ub) for p
-                     in flatten(self.objective.parameters) if p.vary ))
+        bounds = list( (p.bounds.lb, p.bounds.ub) for p
+                     in f_unique(flatten(self.objective.parameters)) if p.vary )
         self.lowerBounds = np.array(list(bound[0] for bound in bounds))
         self.upperBounds = np.array(list(bound[1] for bound in bounds))
 
     def nDim(self):
         if self.nDimensions is None:
-            self.nDimensions = len(list(f_unique(p for p
-                     in flatten(self.objective.parameters) if p.vary )))
+            self.nDimensions = len(list(p for p
+                     in f_unique(flatten(self.objective.parameters)) if p.vary ))
         return self.nDimensions
 
 #     @property

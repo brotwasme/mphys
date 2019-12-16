@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import scipy
 import refnx
 from refnx.dataset import ReflectDataset, Data1D
-from refnx.analysis import Transform, CurveFitter, Objective, Model, Parameter
+from refnx.analysis import Transform, CurveFitter, Objective, GlobalObjective, Model, Parameter
 from refnx.reflect import SLD, Slab, ReflectModel
 print('refnx: %s\nscipy: %s\nnumpy: %s' % (refnx.version.version,
                    scipy.version.version, np.version.version))
@@ -119,7 +119,7 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
             objective1 = Objective(model1, data[0],
                       transform=Transform('logY'),
                       logp_extra=logpExtra)
-            model2 = ReflectModel(structure1, bkg=3e-6, dq=5.0)
+            model2 = ReflectModel(structure2, bkg=3e-6, dq=5.0)
             objective2 = Objective(model2, data[1],
                       transform=Transform('logY'),
                       logp_extra=logpExtra)
