@@ -9,7 +9,9 @@ from refnx.reflect import SLD, Slab, ReflectModel
 print('refnx: %s\nscipy: %s\nnumpy: %s' % (refnx.version.version,
                    scipy.version.version, np.version.version))
 
-def getObjective(data, nLayers, limits = None, doMCMC=False, logpExtra=None): #used
+def getObjective(data, nLayers,
+                 limits = None, doMCMC=False, fitDq=False,
+                 logpExtra=None, onlyStructure=False, both=False):
 
     air = SLD(0,name="air layer")
     airSlab = air(10,0)
@@ -64,15 +66,27 @@ def getObjective(data, nLayers, limits = None, doMCMC=False, logpExtra=None): #u
         sld4Slab.thick.setp(vary=True, bounds=(lowerThick,upperThick))
         sld4Slab.sld.real.setp(vary=True, bounds=(lowerB,upperB))
 
-    if nLayers>=1:
+    if nLayers==1:
         structure = airSlab|sld1Slab|sio2Slab
-    if nLayers>=2:
+    if nLayers==2:
         structure = airSlab|sld1Slab|sld2Slab|sio2Slab
-    if nLayers>=3:
+    if nLayers==3:
         structure = airSlab|sld1Slab|sld2Slab|sld3Slab|sio2Slab
-    if nLayers>=4:
+    if nLayers==4:
         structure = airSlab|sld1Slab|sld2Slab|sld3Slab|sld4Slab|sio2Slab
+    if onlyStructure:
+        returns = structure
+    elif both:
+        model = ReflectModel(structure, bkg=3e-6, dq=5.0)
+        if fitDq:
+            model.dq.setp(vary=True, bounds=(0.,10.))
+        objective = Objective(model, data, transform=Transform('logY'),logp_extra=logpExtra)
+        returns = objective, structure
+    else:
+        model = ReflectModel(structure, bkg=3e-6, dq=5.0)
+        if fitDq:
+            model.dq.setp(vary=True, bounds=(0.,10.))
+        objective = Objective(model, data, transform=Transform('logY'),logp_extra=logpExtra)
+        returns = objective
+    return returns
 
-    model = ReflectModel(structure, bkg=3e-6, dq=5.0)
-    objective = Objective(model, data, transform=Transform('logY'),logp_extra=logpExtra)
-    return objective
