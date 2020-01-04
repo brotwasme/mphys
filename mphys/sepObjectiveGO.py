@@ -20,6 +20,12 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
             bs_contrast_layer = 6
         if contrast_layer is None:
             contrast_layer = 1
+#         print("data, nLayers, bs_contrast_layer=None,\n contrast_layer=None,\nlimits = None, doMCMC=False,\nlogpExtra=None, onlyStructure=False,\nboth=False, globalObjective=False: ",
+#                      data, nLayers, bs_contrast_layer,
+#                      contrast_layer,
+#                      limits, doMCMC,
+#                      logpExtra, onlyStructure,
+#                      both, globalObjective)
 
     air = SLD(0,name="air layer")
     airSlab = air(10,0)
@@ -44,9 +50,9 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
     upperB = limits[3]
 
     if globalObjective:
-        thick_contrast_layer=Parameter(5,
+        thick_contrast_layer=Parameter(maxThick/nLayers,
                                         "layer1 thickness")
-        rough_contrast_layer=Parameter(maxThick/nLayers,
+        rough_contrast_layer=Parameter(0,
                                     "layer0/contrast roughness")
         sldcontrastA=SLD(5,name="contrast A layer")
         sldcontrastASlab= sldcontrastA(thick_contrast_layer,rough_contrast_layer)
@@ -116,20 +122,29 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
             returns = structure1,structure2
         elif both:
             model1 = ReflectModel(structure1, bkg=3e-6, dq=5.0)
+            model1.scale.setp(bounds=(0.85, 1.2), vary=True)
+            model1.bkg.setp(bounds=(1e-9, 9e-6), vary=True)
             objective1 = Objective(model1, data[0],
                       transform=Transform('logY'),
                       logp_extra=logpExtra)
             model2 = ReflectModel(structure2, bkg=3e-6, dq=5.0)
+            model2.scale.setp(bounds=(0.85, 1.2), vary=True)
+            model2.bkg.setp(bounds=(1e-9, 9e-6), vary=True)
             objective2 = Objective(model2, data[1],
                       transform=Transform('logY'),
                       logp_extra=logpExtra)
             returns = GlobalObjective([objective1, objective2]), structure1, structure2
+            print("GlobalObjective and 2 structures")
         else:
             model1 = ReflectModel(structure1, bkg=3e-6, dq=5.0)
+            model1.scale.setp(bounds=(0.85, 1.2), vary=True)
+            model1.bkg.setp(bounds=(1e-9, 9e-6), vary=True)
             objective1 = Objective(model1, data[0],
                       transform=Transform('logY'),
                       logp_extra=logpExtra)
             model2 = ReflectModel(structure2, bkg=3e-6, dq=5.0)
+            model2.scale.setp(bounds=(0.85, 1.2), vary=True)
+            model2.bkg.setp(bounds=(1e-9, 9e-6), vary=True)
             objective2 = Objective(model2, data[1],
                       transform=Transform('logY'),
                       logp_extra=logpExtra)
@@ -158,5 +173,6 @@ def getObjective(data, nLayers, bs_contrast_layer=None,
             returns = objective
     else:
         print("error contrast layer not at sld1Slab ie contrast_layer!=0")
+#     print(returns)
     return returns
 
