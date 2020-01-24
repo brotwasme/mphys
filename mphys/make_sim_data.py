@@ -54,6 +54,12 @@ def main(sim_q=None, sim_R=None, sim_dR=None, file="29553_54.dat"):
     R = data[1]
     dR = data[2]
     q_R = [q,R]
+    if sim_q is None:
+        sim_q = q
+    if sim_R is None:
+        sim_R = R
+    if sim_dR is None:
+        sim_dR = dR
     #[i, c1_2, c3, c4, c5]
     bounds = (0,inf)#[(0,inf),(0,inf),(0,inf),(0,inf),(0,inf)]# 
     dR_R = divide(dR, R)
