@@ -3,9 +3,8 @@ from refnx.reflect import Component, SLD, ReflectModel, Structure
 from refnx.analysis import possibly_create_parameter, Parameters, Parameter
 
 class Bilayer(Component):
-    def __init__(self, Popc, Popg):
+    def __init__(self, Popc, Popg, name="bilayer"):
         super(Bilayer, self).__init__()
-        name = "bilayer"
         self.name = name
         self.Popc = Popc
         self.Popg = Popg
