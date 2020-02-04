@@ -49,4 +49,5 @@ def get_scattering_length(dictionary):
         if imag == None:
             imag = 0
         SL+=imag*1j*value
+    print(SL)
     return SL

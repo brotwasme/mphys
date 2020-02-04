@@ -28,8 +28,8 @@ class Dodab(Component):
             name="{} Solvent SLD".format(name),
             vary=False,
         )
-        d2o_molfr = (1 / d2o.real - h2o.real) * ((
-            self.s_sld * 1e-6 / 0.036182336306) - h2o.real)
+        d2o_molfr = (1 / d2o.real - h2o.real) * ((1e-6*
+            self.s_sld / 0.036182336306) - h2o.real)
         wmol_real = (d2o_molfr * d2o.real) + (
             (1 - d2o_molfr) * h2o.real)
         wmol_imag = (d2o_molfr * d2o.imag) + (
@@ -102,14 +102,14 @@ class Dodab(Component):
         layers = np.zeros((2, 5))
 
         layers[1, 0] = self.volume_heads / self.apm
-        layers[1, 1] = self.b_h / self.volume_heads * 1e6
-        layers[1, 2] = self.bi_h / self.volume_heads * 1e6
+        layers[1, 1] = self.b_h / self.volume_heads #* 1e6
+        layers[1, 2] = self.bi_h / self.volume_heads #* 1e6
         layers[1, 3] = self.roughness
         layers[1, 4] = 0
 
         layers[0, 0] = self.volume_tails / self.apm
-        layers[0, 1] = self.b_t / self.volume_tails * 1e6
-        layers[0, 2] = self.bi_t / self.volume_tails * 1e6
+        layers[0, 1] = self.b_t / self.volume_tails #* 1e6
+        layers[0, 2] = self.bi_t / self.volume_tails #* 1e6
         layers[0, 3] = self.roughness
         layers[0, 4] = 0
 
