@@ -126,7 +126,7 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
         if self.reverse_monolayer:
             layers = np.flipud(layers)
             layers[:, 3] = layers[::-1, 3]
-
+        print("layers",layers)
         return layers
 
     @property

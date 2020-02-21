@@ -38,7 +38,7 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
         self.H2O = float(H2O)
 
     def d2o_mol_fraction_calc(self, r, i):
-        r,i = r.value, i.value
+        r,i = r.value*1e-6, i.value*1e-6
 #         print(self.name,"d2o_mol_fraction_calc", r, i)
         return (1/self.D2O-self.H2O)*((r*27.64)-self.H2O), (1/self.D2O-self.H2O)*((i*27.64)-self.H2O)
     
@@ -147,8 +147,13 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
     @property
     def parameters(self):
         p = super(LipidLeafletWithWaterPer, self).parameters
+        
         p.extend([
             self.water_vm, self.waters_per_head, self.waters_per_tail])
+        if self.waters_per_head is not None:
+            p.extend([self.waters_per_head])
+        if self.waters_per_tail is not None:
+            p.extend([self.waters_per_tail])
         return p
 
     def logp(self):
