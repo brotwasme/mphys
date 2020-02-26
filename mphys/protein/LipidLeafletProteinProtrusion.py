@@ -9,7 +9,8 @@ class LipidLeafletProteinProtrusion(LipidLeafletWithProtien):
                  rough_preceding_mono,
 
                  water_vm, waters_per_head, waters_per_tail,
-                 vm_mscl, PLRatio,
+                 vm_mscl, PLRatio, thickness_protrusion,
+                 roughness_protrusion,
                 
                  head_solvent=None, tail_solvent=None,
                  reverse_monolayer=False, name=''):
@@ -23,5 +24,7 @@ class LipidLeafletProteinProtrusion(LipidLeafletWithProtien):
                 
                  head_solvent, tail_solvent,
                  reverse_monolayer, name)
-
         
+        # if  
+
+    # def 

@@ -80,6 +80,16 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
     def vm_tail(self):
         return self.vm_tails.value + self.water_vm.value * self.waters_per_tail.value
 
+    def total_vm(self):
+        vm_head_lipidAndsolvent = self.vm_head()
+        vm_tail_lipidAndsolvent = self.vm_tail()
+        return 2*(vm_head_lipidAndsolvent+vm_tail_lipidAndsolvent)
+    
+    def total_thickness(self):
+        th_heads = self.thickness_heads.value
+        th_tails = self.thickness_tails.value
+        return 2*(th_heads+th_tails)
+    
     def sld_r(self):
         head_sld = float(self.b_heads_real) / float(self.vm_head()) * 1.e6
         tail_sld = float(self.b_tails_real) / float(self.vm_tail()) * 1.e6
@@ -120,6 +130,11 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
 
         # volume fractions
         # head region
+        
+        apm = self.total_vm()/self.total_thickness()
+        
+        self.apm.value = apm
+        
         volfrac = self.vm_head() / (self.apm.value *
                                          self.thickness_heads.value)
         layers[0, 4] = 1 - volfrac
@@ -157,16 +172,18 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
         return p
 
     def logp(self):
+        returns = 0
         # penalise unphysical volume fractions.
-        volfrac_h = self.vm_head() / (self.apm.value *
-                                    self.thickness_heads.value)
+#         volfrac_h = self.vm_head() / (self.apm.value *
+#                                     self.thickness_heads.value)
 
-        # tail region
-        volfrac_t = self.vm_tail() / (self.apm.value *
-                                    self.thickness_tails.value)
+#         # tail region
+#         volfrac_t = self.vm_tail() / (self.apm.value *
+#                                     self.thickness_tails.value)
 
-        if volfrac_h > 1 or volfrac_t > 1:
-            return -np.inf
-
-        return 0
+#         if volfrac_h > 1 or volfrac_t > 1:
+#             returns += -np.inf
+        if self.thickness_heads.value > self.thickness_tails.value:
+            returns += -np.inf
+        return returns
 

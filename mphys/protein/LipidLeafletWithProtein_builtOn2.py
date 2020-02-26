@@ -48,7 +48,10 @@ class LipidLeafletWithProtien(LipidLeafletWithWaterPer):
         
         self.PLRatio = possibly_create_parameter(
                 PLRatio,
-                name='%s - PLRatio, protien lipid ratio' % name)
+                name='%s - PLRatio, fraction lipid to protein' % name)
+
+#     def vm_head(self):
+        
 
     def b_mscl_head(self):
         bc = 0.6646e-4  #Carbon
@@ -79,41 +82,44 @@ class LipidLeafletWithProtien(LipidLeafletWithWaterPer):
                     mol_frac*822.5*0.9*bd + 
                     (1-mol_frac)*822.5*0.9*bh)
 
+#     def vm_head(self):
+# #         lipidAndWaterHeadVolume = super(LipidLeafletWithProtien, self).vm_head()
+# #         lipidAndWaterTailVolume = super(LipidLeafletWithProtien, self).vm_tail()
+#         lipidAndWaterHeadVolume = self.PLRatioi.value*self.vm_head.value + (1-self.PLRatioi.value)*self.vm_mscl.value
+#         lipidAndWaterTailVolume = 
+#         return 0
+
+    def protien_frac_in_head(self):
+        return self.thickness_heads.value/self.total_thickness()
+
+    def protien_frac_in_tail(self):
+        return self.thickness_tails.value/self.total_thickness()
+
+    def vm_head(self):
+        return self.vm_heads.value*(self.PLRatio.value) + (self.vm_mscl*self.protien_frac_in_head())*(1-self.PLRatio.value) + self.water_vm.value * self.waters_per_head.value
+
+    def vm_tail(self):
+        return self.vm_tails.value*(self.PLRatio.value) + (self.vm_mscl*self.protien_frac_in_tail())*(1-self.PLRatio.value) + self.water_vm.value * self.waters_per_tail.value
+
+    def total_vm(self):
+        vm_lipid = 2*(self.vm_heads.value+self.vm_tails.value)
+        vm_protienAndlipid = vm_lipid*(self.PLRatio) + self.vm_mscl*(1-self.PLRatio)
+        return vm_protienAndlipid + self.water_vm.value * self.waters_per_head.value
+        
 
     def sld_r(self):
-        lipid_head_sld = float(self.b_heads_real) / float(self.vm_head()) * 1.e6
-        lipid_tail_sld = float(self.b_tails_real) / float(self.vm_tail()) * 1.e6
+        lipid_head_sld, lipid_tail_sld = super(LipidLeafletWithProtien, self).sld_r()
         
         mscl_h_sld_r = self.b_mscl_head()/float(self.vm_mscl.value) * 1.e6
         mscl_t_sld_r = self.b_mscl_tail()/float(self.vm_mscl.value) * 1.e6
-
-#         mscl_head_sld = mscl_h_sld_r*(float(self.thickness_heads)/
-#                                   (2*(float(self.thickness_heads)+float(self.thickness_tails))))
-#         mscl_tail_sld = mscl_t_sld_r*(float(self.thickness_heads)/
-#                                   (2*(float(self.thickness_heads)+float(self.thickness_tails))))
-#         print("protein:",mscl_h_sld_r,mscl_t_sld_r)
+        
         head_sld = (self.PLRatio*lipid_head_sld) + (1-self.PLRatio)*mscl_h_sld_r
         tail_sld = (self.PLRatio*lipid_tail_sld) + (1-self.PLRatio)*mscl_t_sld_r
 #         print("slds: ",head_sld,tail_sld)
         return float(head_sld), float(tail_sld)
 
     def sld_i(self):
-        lipid_head_sld = float(self.b_heads_imag) / float(self.vm_head()) * 1.e6
-        lipid_tail_sld = float(self.b_tails_imag) / float(self.vm_tail()) * 1.e6
-
-# #         b_mscl_head_r, b_mscl_head_i = self.b_mscl_head()
-# #         b_mscl_tail_r, b_mscl_tail_i = self.b_mscl_tail()
-        
-#         mscl_h_sld_i = float(b_mscl_head_i)/float(self.vm_mscl.value)# * 1.e6
-#         mscl_t_sld_i = float(b_mscl_tail_i)/float(self.vm_mscl.value)# * 1.e6
-
-#         mscl_head_sld = mscl_h_sld_i*(float(self.thickness_heads)/
-#                                   (2*(float(self.thickness_heads)+float(self.thickness_tails))))
-#         mscl_tail_sld = mscl_t_sld_i*(float(self.thickness_heads)/
-#                                   (2*(float(self.thickness_heads)+float(self.thickness_tails))))
-
-        #head_sld = lipid_head_sld#(self.PLRatio*lipid_head_sld) + (1-self.PLRatio)*0#mscl_head_sld
-        #tail_sld = lipid_tail_sld#`(self.PLRatio*lipid_tail_sld) + (1-self.PLRatio)*0#mscl_tail_sld
+        lipid_head_sld, lipid_tail_sld = super(LipidLeafletWithProtien, self).sld_i()
         return lipid_head_sld, lipid_tail_sld
 
 
