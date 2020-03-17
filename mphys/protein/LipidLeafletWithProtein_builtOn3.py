@@ -49,38 +49,46 @@ class LipidLeafletWithProtien(LipidLeafletWithWaterPer):
         self.PLRatio = possibly_create_parameter(
                 PLRatio,
                 name='%s - PLRatio, fraction lipid to protein' % name)
+        
+        bc = 0.6646e-4  #Carbon
+        bo = 0.5804e-4  #Oxygen
+        bh = -0.3739e-4 #Hydrogen
+        #bp = 0.513e-4   #Phosphorus
+        bn = 0.936e-4   #Nitrogen
+        #bd = 0.6671e-4  #Deuterium
+        bs = 2.847e-4   #Sulphur
+        self.b_mscl_base = float(2745*bc + 675*bn + 641*bo + 25*bs + 
+                    (4374.5-822.5*0.9)*bh)
 
 #     def vm_head(self):
         
 
     def b_mscl_head(self):
-        bc = 0.6646e-4  #Carbon
-        bo = 0.5804e-4  #Oxygen
+        #bc = 0.6646e-4  #Carbon
+        #bo = 0.5804e-4  #Oxygen
         bh = -0.3739e-4 #Hydrogen
         #bp = 0.513e-4   #Phosphorus
-        bn = 0.936e-4   #Nitrogen
+        #bn = 0.936e-4   #Nitrogen
         bd = 0.6671e-4  #Deuterium
-        bs = 2.847e-4   #Sulphur
-        mol_frac,i = self.d2o_mol_fraction_head()
-        return float(2745*bc + 675*bn + 641*bo + 25*bs + 
-                    (4374.5-822.5*0.9)*bh +
-                    mol_frac*822.5*0.9*bd + 
-                    (1-mol_frac)*822.5*0.9*bh)
+        #bs = 2.847e-4   #Sulphur
+        mol_frac = self.d2o_mol_fraction_head() #,i
+        return float(self.b_mscl_base +
+                    mol_frac*822.5*0.9*bd
+                    +(1-mol_frac)*822.5*0.9*bh)
 
     def b_mscl_tail(self):
-        bc = 0.6646e-4  #Carbon
-        bo = 0.5804e-4  #Oxygen
+        #bc = 0.6646e-4  #Carbon
+        #bo = 0.5804e-4  #Oxygen
         bh = -0.3739e-4 #Hydrogen
         #bp = 0.513e-4   #Phosphorus
-        bn = 0.936e-4   #Nitrogen
+       # bn = 0.936e-4   #Nitrogen
         bd = 0.6671e-4  #Deuterium
-        bs = 2.847e-4   #Sulphur
-        mol_frac,i = self.d2o_mol_fraction_tail()
+       # bs = 2.847e-4   #Sulphur
+        mol_frac = self.d2o_mol_fraction_tail() #,i
 #         print("mol_frac",mol_frac)
-        return float(2745*bc + 675*bn + 641*bo + 25*bs + 
-                    (4374.5-822.5*0.9)*bh +
-                    mol_frac*822.5*0.9*bd + 
-                    (1-mol_frac)*822.5*0.9*bh)
+        return float(self.b_mscl_base +
+                    mol_frac*822.5*0.9*bd
+                    +(1-mol_frac)*822.5*0.9*bh)
 
 #     def vm_head(self):
 # #         lipidAndWaterHeadVolume = super(LipidLeafletWithProtien, self).vm_head()
@@ -96,21 +104,26 @@ class LipidLeafletWithProtien(LipidLeafletWithWaterPer):
         return self.thickness_tails.value/self.total_thickness()
 
     def vm_head(self):
-        return self.vm_heads.value*(self.PLRatio.value) + (self.vm_mscl*self.protien_frac_in_head())*(1-self.PLRatio.value) + self.water_vm.value * self.waters_per_head.value
+        # print("head vm")
+        return self.vm_heads.value*(self.PLRatio.value) + (self.vm_mscl.value*self.protien_frac_in_head())*(1-self.PLRatio.value)# + self.water_vm.value * self.waters_per_head.value
 
     def vm_tail(self):
-        return self.vm_tails.value*(self.PLRatio.value) + (self.vm_mscl*self.protien_frac_in_tail())*(1-self.PLRatio.value) + self.water_vm.value * self.waters_per_tail.value
+        # print("tail vm")
+        return self.vm_tails.value*(self.PLRatio.value) + (self.vm_mscl.value*self.protien_frac_in_tail())*(1-self.PLRatio.value)# + self.water_vm.value * self.waters_per_tail.value
 
     def total_vm(self):
         vm_lipid = 2*(self.vm_heads.value+self.vm_tails.value)
-        vm_protienAndlipid = vm_lipid*(self.PLRatio) + self.vm_mscl*(1-self.PLRatio)
-        return vm_protienAndlipid + self.water_vm.value * self.waters_per_head.value
+        vm_protienAndlipid = vm_lipid*(self.PLRatio.value) + self.vm_mscl.value*(1-self.PLRatio.value)
+        # print("volums:", vm_protienAndlipid, 2*(self.vm_head()+self.vm_tail()))
+        vm_water = 2*self.water_vm.value * (self.waters_per_head.value+self.waters_per_tail.value)
+        # print("total vm")
+        return vm_protienAndlipid + vm_water
         
 
     def sld_r(self):
         lipid_head_sld, lipid_tail_sld = super(LipidLeafletWithProtien, self).sld_r()
         
-        mscl_h_sld_r = self.b_mscl_head()/float(self.vm_mscl.value) * 1.e6
+        mscl_h_sld_r = self.b_mscl_head()/float(self.vm_mscl.value) * 1.e6 #if solvation in head and tail are same then so are these, ignores water per 
         mscl_t_sld_r = self.b_mscl_tail()/float(self.vm_mscl.value) * 1.e6
         
         head_sld = (self.PLRatio*lipid_head_sld) + (1-self.PLRatio)*mscl_h_sld_r

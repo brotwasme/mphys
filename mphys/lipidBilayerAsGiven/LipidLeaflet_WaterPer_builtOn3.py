@@ -37,52 +37,52 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
         self.D2O = float(D2O)
         self.H2O = float(H2O)
 
-    def d2o_mol_fraction_calc(self, r, i):
-        r,i = r.value*1e-6, i.value*1e-6
+    def d2o_mol_fraction_calc(self, r): #, i):
+        r = r.value*1e-6#, i.value*1e-6 ,i
 #         print(self.name,"d2o_mol_fraction_calc", r, i)
-        return (1/self.D2O-self.H2O)*((r*27.64)-self.H2O), (1/self.D2O-self.H2O)*((i*27.64)-self.H2O)
+        return (1/self.D2O-self.H2O)*((r*27.64)-self.H2O)#, (1/self.D2O-self.H2O)*((i*27.64)-self.H2O)
     
     def d2o_mol_fraction_head(self):
-        return self.d2o_mol_fraction_calc(self.head_solvent.real, self.head_solvent.imag)
+        return self.d2o_mol_fraction_calc(self.head_solvent.real)#, self.head_solvent.imag)
 
     def d2o_mol_fraction_tail(self):
-        return self.d2o_mol_fraction_calc(self.tail_solvent.real, self.tail_solvent.imag)
+        return self.d2o_mol_fraction_calc(self.tail_solvent.real)#, self.tail_solvent.imag)
 
-    def wMol_calc(self, r, i):
+    def wMol_calc(self, r):#, i):
 #         print(self.name,"wMol_calc",r,i)
-        return (r * self.D2O) + ((1-r)*self.H2O), (i * self.D2O) + ((1-i)*self.H2O)
+        return (r * self.D2O) + ((1-r)*self.H2O)#, (i * self.D2O) + ((1-i)*self.H2O)
 
     def wMol_head(self):
-        d2o_mol_fraction_head_r, d2o_mol_fraction_head_i = self.d2o_mol_fraction_head()
-        return self.wMol_calc(d2o_mol_fraction_head_r, d2o_mol_fraction_head_i)
+        d2o_mol_fraction_head_r = self.d2o_mol_fraction_head() #, d2o_mol_fraction_head_i 
+        return self.wMol_calc(d2o_mol_fraction_head_r) #, d2o_mol_fraction_head_i)
 
     def wMol_tail(self):
-        d2o_mol_fraction_tail_r, d2o_mol_fraction_tail_i = self.d2o_mol_fraction_tail()
-        return self.wMol_calc(d2o_mol_fraction_tail_r, d2o_mol_fraction_tail_i)
+        d2o_mol_fraction_tail_r = self.d2o_mol_fraction_tail() # , d2o_mol_fraction_tail_i 
+        return self.wMol_calc(d2o_mol_fraction_tail_r) #, d2o_mol_fraction_tail_i)
 
-    def calc_solvent_true(self, r, i):
+    def calc_solvent_true(self, r):#, i):
 #         print(self.name,"calc_solvent_true",r,i)
-        return complex(r*self.waters_per_head.value/self.vm_head(), i*self.waters_per_head.value/self.vm_head())
+        return complex(r/self.water_vm.value,0)# i/self.water_vm.value)
 
     def head_solvent_true(self):
-        wMol_r, wMol_i = self.wMol_head()
+        wMol_r = self.wMol_head() #, wMol_i 
 #         print("wMol_r, wMol_i:", wMol_r, wMol_i)
-        return self.calc_solvent_true(wMol_r, wMol_i)
+        return self.calc_solvent_true(wMol_r) #, wMol_i)
 
     def tail_solvent_true(self):
-        wMol_tail_r, wMol_tail_i = self.wMol_tail()
+        wMol_r = self.wMol_tail() #, wMol_i
 #         print("wMol_tail_r, wMol_tail_i:", wMol_tail_r, wMol_tail_i)
-        return complex(wMol_tail_r*self.waters_per_tail.value/self.vm_tail(), wMol_tail_i*self.waters_per_tail.value/self.vm_tail())
+        return self.calc_solvent_true(wMol_r)#, wMol_i)
 
     def vm_head(self):
-        return self.vm_heads.value + self.water_vm.value * self.waters_per_head.value
+        return self.vm_heads.value
 
     def vm_tail(self):
-        return self.vm_tails.value + self.water_vm.value * self.waters_per_tail.value
+        return self.vm_tails.value
 
     def total_vm(self):
-        vm_head_lipidAndsolvent = self.vm_head()
-        vm_tail_lipidAndsolvent = self.vm_tail()
+        vm_head_lipidAndsolvent = self.vm_head() + self.water_vm.value * self.waters_per_head.value
+        vm_tail_lipidAndsolvent = self.vm_tail() + self.water_vm.value * self.waters_per_tail.value
         return 2*(vm_head_lipidAndsolvent+vm_tail_lipidAndsolvent)
     
     def total_thickness(self):
@@ -91,13 +91,13 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
         return 2*(th_heads+th_tails)
     
     def sld_r(self):
-        head_sld = float(self.b_heads_real) / float(self.vm_head()) * 1.e6
-        tail_sld = float(self.b_tails_real) / float(self.vm_tail()) * 1.e6
+        head_sld = float(self.b_heads_real) / float(self.vm_heads.value) * 1.e6
+        tail_sld = float(self.b_tails_real) / float(self.vm_tails.value) * 1.e6
         return head_sld, tail_sld
 
     def sld_i(self):
-        head_sld = float(self.b_heads_imag) / float(self.vm_head()) * 1.e6
-        tail_sld = float(self.b_tails_imag) / float(self.vm_tail()) * 1.e6
+        head_sld = float(self.b_heads_imag) / float(self.vm_heads.value) * 1.e6
+        tail_sld = float(self.b_tails_imag) / float(self.vm_tails.value) * 1.e6
         return head_sld, tail_sld
 
     def slabs(self, structure=None):
@@ -138,16 +138,20 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
         volfrac = self.vm_head() / (self.apm.value *
                                          self.thickness_heads.value)
         layers[0, 4] = 1 - volfrac
+        # print("volfrac h", volfrac)
+        # print(layers[0])
         if self.head_solvent is not None:
             # we do the solvation here, not in Structure.slabs
             layers[0] = Structure.overall_sld(layers[0], self.head_solvent_true())
             layers[0, 4] = 0
 
+        # print(layers[0])
         # tail region
         volfrac = self.vm_tail() / (self.apm.value *
                                          self.thickness_tails.value)
 
         layers[1, 4] = 1 - volfrac
+        # print("volfrac t", volfrac)
         if self.tail_solvent is not None:
             # we do the solvation here, not in Structure.slabs
             layers[1] = Structure.overall_sld(layers[1], self.tail_solvent_true())
@@ -183,7 +187,7 @@ class LipidLeafletWithWaterPer(LipidLeaflet):
 
 #         if volfrac_h > 1 or volfrac_t > 1:
 #             returns += -np.inf
-        if self.thickness_heads.value > self.thickness_tails.value:
-            returns += -np.inf
+        # if self.thickness_heads.value > self.thickness_tails.value:
+        #     returns += -np.inf
         return returns
 
